@@ -27,7 +27,7 @@ moduleInput?.addEventListener('change', async (e) => {
     {
         try {
             const context: string = await prefab.text();
-            const fixed = context.replaceAll(targetRegex, (match, p1, p2, p3, p4) => {
+            const fixed = context.replaceAll(targetRegex, (_match, p1, _p2, p3, p4) => {
                 const newValue = p3 === 'VerticalBottomToTop' ? 'VerticalTopToBottom' : 'VerticalBottomToTop';
                 console.log(prefab.name);
                 console.log(p1 + newValue + p4);
@@ -43,7 +43,7 @@ moduleInput?.addEventListener('change', async (e) => {
     }
 });
 
-downloadButton?.addEventListener('click', async (e) => {
+downloadButton?.addEventListener('click', async () => {
     if (zip === null) return;
 
     const blob = await zip.generateAsync({ type: 'blob' });
