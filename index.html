@@ -4,10 +4,67 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>bannerlord-widget-fixer</title>
-    <script type="module" crossorigin src="/Bannerlord-Widget-Fixer/assets/index-DjQf3Zky.js"></script>
+    <script type="module" crossorigin src="/Bannerlord-Widget-Fixer/assets/index-D1iwVPsR.js"></script>
+    <link rel="stylesheet" crossorigin href="/Bannerlord-Widget-Fixer/assets/index-BUNUFxXc.css">
   </head>
   <body>
-    <input type="file" id="moduleInput" webkitdirectory directory multiple />
-    <button id="downloadButton">Download</button>
+    <div id="header">
+      <div id="page-title">Bannerlord Widget Fixer for v1.4.0 Beta</div>
+      <div id="page-author">echieve</div>
+    </div>
+    
+    <hr />
+
+    <div id="instruction-container">
+      <h2>How to Use</h2>
+      <ol>
+        <li><b>Upload</b> <code>[ModuleFolder]/GUI/Prefabs</code> folder.</li>
+        <li><b>Download</b> <code>.zip</code> file.</li>
+        <li><b>Extract</b> and <b>Place</b> in the same directory.</li>
+        <div>(For a detailed guide with visual aids, please refer to the screenshot tutorial below.)</div>
+      </ol>
+      <h3>Note</h3>
+      <ul>
+        <li>Back up your original files before proceeding.</li>
+        <li>Ensure the backup folder is renamed to something entirely different (e.g., avoid using <code>Prefabs Backup</code>).</li>
+      </ul>
+    </div>
+
+    <hr />
+
+    <div id="main">
+      <div id="drop-zone-container">
+        <div id="drop-zone">
+          <label id="module-upload-label" for="module-upload">Upload</label>
+          <span id="drop-zone-space"></span>
+        </div>
+        <span id="download-button" class="hidden">Download</span>
+      </div>
+      <input title="Hello" type="file" id="module-upload" webkitdirectory directory multiple />
+
+      <div id="fix-list"></div>
+    </div>
+
+    <hr />
+
+    <div id="walk-through-container">
+      <h1>Background</h1>
+      <div>With the Bannerlord <code>v1.4.0 Beta</code> update, minor adjustments were made to the engine code. In this process, the alignment of UI widgets was inverted compared to previous versions. Consequently, many beta testers are experiencing UI breakage or mirrored layouts, making existing mods difficult to use.</div>
+      <div>While we would normally have to wait for each modder to patch their work if a mod failed to load entirely, it felt like a waste to leave mods unusable just because of broken UI layouts. Although there is a possibility of further changes after the beta, this update seems more like a normalization of the alignment system rather than a simple mistake of Taleworlds; therefore, I think it is highly unlikely that the engine will revert to the previous method.</div>
+    
+      <h1>How it works</h1>
+      <div>This issue stems from changes in how the engine stacks child widgets within a <b>ListPanel.</b></div>
+      <div>Previously, setting the <b>LayoutMethod</b> to <b>VerticalBottomToTop</b> caused widgets to stack from top to bottom, and <b>VerticalTopToBottom</b> stacked them from bottom to top. As of the <code>v1.4.0 Beta</code>, this has been corrected to match horizontal logic: <b>VerticalBottomToTop</b> now stacks from bottom to top, and <b>VerticalTopToBottom</b> stacks from top to bottom.</div>
+      <div>This tool scans all <b>LayoutMethod</b> values within the widget folder and inverts them to align with the <code>v1.4.0 Beta</code> updates.</div>
+
+      <h1>How to Use (Images)</h1>
+      <h3>1. <b>Upload</b> <code>[ModuleFolder]/GUI/Prefabs</code> folder</h3>
+      <img class="how-to-use-img" src="/Bannerlord-Widget-Fixer/assets/HowToUse1-CnnDJbL7.png" alt="HowToUse1" />
+      <h3>2. <b>Download</b> <code>.zip</code> file</h3>
+      <img class="how-to-use-img" src="/Bannerlord-Widget-Fixer/assets/HowToUse2-CQDWPmQj.png" alt="HowToUse2" />
+      <h3>3. <b>Extract</b> and <b>Place</b> in the same directory</h3>
+      <img class="how-to-use-img" src="/Bannerlord-Widget-Fixer/assets/HowToUse3-BZQYtPXc.png" alt="HowToUse3" />
+    </div>
+
   </body>
 </html>
