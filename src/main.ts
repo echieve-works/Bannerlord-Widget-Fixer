@@ -1,61 +1,156 @@
+import './main.css';
 import JSZip from 'jszip';
 
-const moduleInput = document.querySelector<HTMLInputElement>("#moduleInput");
-const downloadButton = document.querySelector<HTMLInputElement>("#downloadButton");
+const dropZoneSpaceElement = document.querySelector<HTMLElement>("#drop-zone-space")!;
+const dropZoneSpaceText = "or Drag & Drop";
+dropZoneSpaceElement.innerText = dropZoneSpaceText;
 
-const targetRegex = /(<ListPanel[^>]*?(StackLayout|LayoutImp)\.LayoutMethod\s*=\s*")(VerticalBottomToTop|VerticalTopToBottom)(")/g;
+const dropZoneElement = document.querySelector<HTMLElement>("#drop-zone")!;
+dropZoneElement.addEventListener('dragover', (e: DragEvent) => {
+    e.preventDefault();
+    dropZoneElement.classList.add('drag-over');
+})
+dropZoneElement.addEventListener('dragleave', () => {
+    dropZoneElement.classList.remove('drag-over');
+});
+dropZoneElement.addEventListener('drop', async (e: DragEvent) => {
+    e.preventDefault();
+    dropZoneElement.classList.remove('drag-over');
 
-let zip: JSZip | null = null;
+    if (!e.dataTransfer) return;
+    if (!e.dataTransfer.items) return;
 
-moduleInput?.addEventListener('change', async (e) => {
-    zip = new JSZip();
+    let fileCount = 0;
+    const filePathPairs: [File, string][] = [];
 
-    const input = e.target as HTMLInputElement;
-    const files = Array.from(input.files || []);
-    if (files.length === 0) return;
+    async function traverseEntry(entry: FileSystemEntry, path: string) {
+        if (entry.isFile) {
+            const fileEntry = entry as FileSystemFileEntry;
+            const file = await new Promise<File>((resolve) => fileEntry.file(resolve));
+            filePathPairs.push([file, path + file.name]);
+            fileCount++;
+        } else if (entry.isDirectory) {
+            const dirEntry = entry as FileSystemDirectoryEntry;
+            const entries = await new Promise<FileSystemEntry[]>((resolve) => dirEntry.createReader().readEntries(resolve));
 
-    const prefabs = files.filter(file => {
-        if (file.name.endsWith('.xml'))
-            return true;
-
-        zip!.file(file.webkitRelativePath, file);
-        return false;
-    })
-    if (prefabs.length === 0) return;
-    
-    for (var prefab of prefabs)
-    {
-        try {
-            const context: string = await prefab.text();
-            const fixed = context.replaceAll(targetRegex, (_match, p1, _p2, p3, p4) => {
-                const newValue = p3 === 'VerticalBottomToTop' ? 'VerticalTopToBottom' : 'VerticalBottomToTop';
-                console.log(prefab.name);
-                console.log(p1 + newValue + p4);
-                return p1 + newValue + p4;
-            });
-
-            zip!.file(prefab.webkitRelativePath, fixed);
+            for (const child of entries) {
+                await traverseEntry(child, path + entry.name + "/");
+            }
         }
-        catch (error) {
-            alert(error);
-            zip = null;
-        }
+    }
+
+    for (const item of e.dataTransfer.items) {
+        const entry = item.webkitGetAsEntry();
+        if (!entry) continue;
+        await traverseEntry(entry, "");
+    }
+
+    dropZoneSpaceElement.innerText = fileCount + " files";
+
+    FixTool.open();
+    for (const [file, path] of filePathPairs) {
+        await FixTool.fix(file, path);
     }
 });
 
-downloadButton?.addEventListener('click', async () => {
-    if (zip === null) return;
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Fixed.zip';
+const moduleUploadElement = document.querySelector<HTMLInputElement>("#module-upload")!;
+moduleUploadElement.addEventListener('change', async (e) => {
+    const input = e.target as HTMLInputElement;
+    if (!input.files) return;
 
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    dropZoneSpaceElement.innerText = input.files.length + " files";
+
+    FixTool.open();
+    for (const file of input.files) {
+        await FixTool.fix(file, file.webkitRelativePath);
+    }
 });
+
+const fixListElement = document.querySelector<HTMLElement>("#fix-list")!;
+const downloadButtonElement = document.querySelector<HTMLElement>("#download-button")!;
+downloadButtonElement.addEventListener('click', () => {
+    FixTool.download();
+})
+
+
+class FixTool {
+    static readonly LISTPANEL_FIX_REGEX = /(<ListPanel[^>]*?(StackLayout|LayoutImp)\.LayoutMethod\s*=\s*")(VerticalBottomToTop|VerticalTopToBottom)(")/g;
+    static readonly VERTICAL_TOP_TO_BOTTOM = "VerticalTopToBottom";
+    static readonly VERTICAL_BOTTOM_TO_TOP = "VerticalBottomToTop";
+
+    static zip: JSZip = new JSZip;
+
+    static open()
+    {
+        this.zip = new JSZip;
+        fixListElement.replaceChildren();
+        downloadButtonElement.classList.add('hidden');
+    }
+
+    static async fix(file: File, fullPath: string) {
+        if (!fullPath.startsWith("Prefabs/"))
+        {
+            alert("The selected file is not in the 'Prefabs' folder.");
+            return;
+        }
+
+        const parts = fullPath.split('/');
+
+        fullPath = "";
+        for (let i = 1; i < parts.length; i++)
+        {
+            fullPath += parts[i];
+            if (i !== parts.length - 1) fullPath += '/';
+        }
+
+
+        const element = document.createElement('div');
+        element.classList.add('fix-item');
+        element.innerText = fullPath;
+        fixListElement.appendChild(element);
+
+        if (!file.name.endsWith('.xml')) {
+            this.zip.file(fullPath, await file.arrayBuffer());
+            return;
+        }
+
+        let fixCount = 0;
+
+        const context: string = await file.text();
+        const fixed = context.replaceAll(FixTool.LISTPANEL_FIX_REGEX, (_match, p1, _p2, p3, p4) => {
+            const newValue = p3 === FixTool.VERTICAL_BOTTOM_TO_TOP ? FixTool.VERTICAL_TOP_TO_BOTTOM : FixTool.VERTICAL_BOTTOM_TO_TOP;
+            fixCount++;
+            return p1 + newValue + p4;
+        });
+
+        if (fixCount > 0)
+        {
+            const tagElement = document.createElement('span');
+            tagElement.classList.add('fix-item-tag');
+            element.appendChild(tagElement);
+            
+            tagElement.classList.add('tag-modified');
+            tagElement.innerText = "[Modified]";
+
+            downloadButtonElement.classList.remove('hidden');
+        }
+
+        this.zip.file(fullPath, fixed);
+    }
+
+    static async download() {
+        const blob = await this.zip.generateAsync({ type: 'blob' });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Prefabs.zip';
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+}

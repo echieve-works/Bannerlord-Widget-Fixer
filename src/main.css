@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    user-select: none;
+}
+
+*:not(code):not(pre) {
+    font-family: "Roboto", sans-serif;
+}
+
+.hidden {
+    display: none !important;
+}
+
+code {
+    background-color: #ddd;
+    padding: 2px;
+    border-radius: 3px;
+}
+
+#header {
+    margin-bottom: 20px;
+}
+#page-title {
+    font-size: 30px;
+    font-weight: 900;
+    margin-top: 30px;
+}
+#page-author {
+    font-size: 15px;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+#instruction-container {
+    margin-bottom: 50px;
+}
+#instruction-container li {
+    font-weight: 400;
+    padding-bottom: 10px;
+}
+
+
+#main {
+    margin-top: 20px;
+}
+#drop-zone-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ddd;
+    border-radius: 5px;
+}
+#drop-zone-container.drag-over {
+    background-color: #aaa;
+}
+#drop-zone {
+    padding: auto;
+    flex-grow: 1;
+}
+#drop-zone-space {
+    margin-left: 5px;
+    pointer-events: none;
+    font-weight: 600;
+}
+
+#module-upload {
+    display: none;
+}
+#module-upload-label {
+    display: inline-block;
+    background-color: black;
+    color: white;
+    padding: 15px 15px;
+    border-radius: 5px;
+}
+#module-upload-label:hover {
+    color: #ddd;
+}
+
+#download-button {
+    display: inline-block;
+    background-color: #2b7da3ff;
+    color: white;
+    padding: 15px 15px;
+    border-radius: 5px;
+}
+#download-button:hover {
+    color: #ddd;
+}
+#download-button:active {
+    color: #aaa;
+}
+
+#fix-list {
+    background-color: #eee;
+    margin: 20px;
+    border-radius: 5px;
+    padding: 20px;
+}
+.fix-item {
+    font-weight: 200;
+    margin-bottom: 5px;
+}
+.fix-item-tag {
+    font-weight: 300;
+    margin-left: 10px;
+}
+
+.fix-item-tag.tag-modified {
+    color: #f22;
+}
+
+
+#walk-through-container {
+    margin-top: 80px;
+    margin-bottom: 200px;
+}
+#walk-through-container div {
+    font-weight: 400;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+#walk-through-container h1 {
+    margin-top: 80px;
+}
+.how-to-use-img {
+    width: 100%;
+    margin-bottom: 50px;
+}
